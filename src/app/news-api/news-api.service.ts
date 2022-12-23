@@ -2,6 +2,8 @@ import { Injectable } from '@angular/core';
 import { Subject, Observable, of } from 'rxjs';
 import { tap, map, switchMap, pluck } from 'rxjs/operators';
 import { HttpParams, HttpClient } from '@angular/common/http';
+import { environment } from 'src/environments/environment';
+import { EndpointsService } from '../endpoints.service';
 
 export interface Article {
   title: string;
@@ -20,18 +22,18 @@ interface NewsApiResponse {
   providedIn: 'root',
 })
 export class NewsApiService {
-  private url: string = 'https://newsapi.org/v2/top-headlines';
+  private url: string = '';
   private pageSize: number = 10;
-  private apiKey: string = '73a066086b934308974c548c8437ed30';
+  private apiKey: string = environment.NEWS_API_KEY;
   private country: string = 'in';
 
   private pagesInput: Subject<number>;
   pagesOutput: Observable<Article[]>;
   numberOfPages: Subject<number>;
 
-  constructor(private http: HttpClient) {
+  constructor(private http: HttpClient, private endpointsService: EndpointsService) {
     this.numberOfPages = new Subject();
-
+    this.url = endpointsService.getNews;
     this.pagesInput = new Subject();
     this.pagesOutput = this.pagesInput.pipe(
       map((page) => {

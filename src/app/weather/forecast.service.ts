@@ -14,6 +14,8 @@ import {
   retry,
 } from 'rxjs/operators';
 import { NotificationsService } from '../notifications/notifications.service';
+import { environment } from 'src/environments/environment';
+import { EndpointsService } from '../endpoints.service';
 
 interface OpenWeatherResponse {
   list: {
@@ -28,12 +30,15 @@ interface OpenWeatherResponse {
   providedIn: 'root',
 })
 export class ForecastService {
-  private url: string = 'https://api.openweathermap.org/data/2.5/forecast';
+  private url: string = '';
 
   constructor(
     private http: HttpClient,
-    private notificationsService: NotificationsService
-  ) {}
+    private notificationsService: NotificationsService,
+    private endpointsService: EndpointsService
+  ) {
+    this.url = endpointsService.getWeather;
+  }
 
   getForecast(): Observable<{ dateString: string; temp: number }[]> {
     return this.getCurrentLocation().pipe(
@@ -42,7 +47,7 @@ export class ForecastService {
           .set('lat', String(coords.latitude))
           .set('lon', String(coords.longitude))
           .set('units', 'metric')
-          .set('appid', 'c10da50a80004272567581743bbf9a85');
+          .set('appid', environment.WEATHER_API_KEY);
       }),
       switchMap((params) =>
         this.http.get<OpenWeatherResponse>(this.url, { params })
